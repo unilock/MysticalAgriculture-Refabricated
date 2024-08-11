@@ -8,6 +8,8 @@ import com.alex.mysticalagriculture.blockentities.HarvesterBlockEntity;
 import com.alex.mysticalagriculture.blockentities.ReprocessorBlockEntity;
 import com.alex.mysticalagriculture.blockentities.SoulExtractorBlockEntity;
 import com.alex.mysticalagriculture.config.ModConfigs;
+import com.alex.mysticalagriculture.handler.AugmentHandler;
+import com.alex.mysticalagriculture.handler.ExperienceCapsuleHandler;
 import com.alex.mysticalagriculture.handler.MobDropHandler;
 import com.alex.mysticalagriculture.init.*;
 import com.alex.mysticalagriculture.registry.AugmentRegistry;
@@ -16,6 +18,7 @@ import com.alex.mysticalagriculture.registry.MobSoulTypeRegistry;
 import com.alex.mysticalagriculture.registry.PluginRegistry;
 import com.alex.mysticalagriculture.util.RecipeIngredientCache;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import io.github.fabricators_of_create.porting_lib.event.common.TagsUpdatedCallback;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -49,6 +52,7 @@ public class MysticalAgriculture implements ModInitializer {
     public void onInitialize() {
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ModCreativeModeTabs.CREATIVE_MODE_TAB, CREATIVE_MODE_TAB);
 
+        ExperienceCapsuleHandler.onPlayerPickupXp();
         MobDropHandler.onLivingDrops();
 
         try {
@@ -141,6 +145,8 @@ public class MysticalAgriculture implements ModInitializer {
         }, ModBlocks.SOUL_EXTRACTOR);
 
         ItemStorage.SIDED.registerForBlocks((world, pos, state, entity, direction) -> Storage.empty(), ModBlocks.TINKERING_TABLE);
+
+        LivingEntityEvents.FALL.register(AugmentHandler::onLivingFall);
     }
 
     private static void initAPI() throws NoSuchFieldException, IllegalAccessException {

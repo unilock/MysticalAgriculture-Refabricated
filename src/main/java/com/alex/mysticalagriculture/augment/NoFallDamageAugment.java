@@ -1,8 +1,8 @@
 package com.alex.mysticalagriculture.augment;
 
-import com.alex.cucumber.forge.event.entity.living.LivingFallEvent;
 import com.alex.mysticalagriculture.api.tinkering.Augment;
 import com.alex.mysticalagriculture.api.tinkering.AugmentType;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -15,7 +15,7 @@ public class NoFallDamageAugment extends Augment {
     }
 
     @Override
-    public void onPlayerFall(Level world, Player player, LivingFallEvent event) {
+    public void onPlayerFall(Level world, Player player, LivingEntityEvents.Fall.FallEvent event) {
         event.setDamageMultiplier(0);
     }
 }

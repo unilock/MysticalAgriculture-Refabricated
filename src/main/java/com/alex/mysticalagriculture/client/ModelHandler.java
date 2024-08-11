@@ -1,19 +1,17 @@
 package com.alex.mysticalagriculture.client;
 
-import com.alex.cucumber.forge.client.event.ModelEvent;
 import com.alex.mysticalagriculture.MysticalAgriculture;
 import com.alex.mysticalagriculture.api.crop.CropTextures;
 import com.alex.mysticalagriculture.config.ModConfigs;
 import com.alex.mysticalagriculture.registry.CropRegistry;
-import com.google.common.base.Stopwatch;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
-import net.minecraft.client.resources.model.BakedModel;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class ModelHandler {
@@ -54,92 +52,111 @@ public class ModelHandler {
         });
     }
 
-    public static void onModelBakingCompleted(ModelEvent.BakingCompleted event) {
-        var stopwatch = Stopwatch.createStarted();
-
-        var registry = event.getModels();
-
-        if (!ModConfigs.ANIMATED_GROWTH_ACCELERATORS.get()) {
-            for (var tier : new String[] { "inferium", "prudentium", "tertium", "imperium", "supremium" }) {
-                var loc = String.format("%s_growth_accelerator", tier);
-                var blockModel = registry.get(new ResourceLocation(MysticalAgriculture.MOD_ID, "block/" + loc + "_static"));
-                var itemModel = registry.get(new ResourceLocation(MysticalAgriculture.MOD_ID, "item/" + loc + "_static"));
-
-                registry.replace(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, ""), blockModel);
-                registry.replace(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, "inventory"), itemModel);
+    // TODO: this may not work well
+    //       (ResourceLocation and ModelResourceLocation may be reversed?)
+    public static void onModelBakingCompleted() {
+        ModelLoadingPlugin.register(ctx -> {
+            if (!ModConfigs.ANIMATED_GROWTH_ACCELERATORS.get()) {
+                for (var tier : new String[] { "inferium", "prudentium", "tertium", "imperium", "supremium" }) {
+                    var loc = tier+"_growth_accelerator";
+                    ctx.modifyModelAfterBake().register((model, context) -> {
+                        if (Objects.equals(context.id(), new ResourceLocation(MysticalAgriculture.MOD_ID, "block/" + loc + "_static"))) {
+                            return context.baker().bake(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, ""), context.settings());
+                        }
+                        if (Objects.equals(context.id(), new ResourceLocation(MysticalAgriculture.MOD_ID, "item/" + loc + "_static"))) {
+                            return context.baker().bake(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, "inventory"), context.settings());
+                        }
+                        return model;
+                    });
+                }
             }
-        }
 
-        var cropModels = new HashMap<ResourceLocation, BakedModel[]>();
+            if (!ModConfigs.ANIMATED_GROWTH_ACCELERATORS.get()) {
+                for (var tier : new String[] { "inferium", "prudentium", "tertium", "imperium", "supremium" }) {
+                    var loc = tier+"_growth_accelerator";
+                    ctx.modifyModelAfterBake().register((model, context) -> {
+                        if (Objects.equals(context.id(), new ResourceLocation(MysticalAgriculture.MOD_ID, "block/" + loc + "_static"))) {
+                            return context.baker().bake(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, ""), context.settings());
+                        }
+                        if (Objects.equals(context.id(), new ResourceLocation(MysticalAgriculture.MOD_ID, "item/" + loc + "_static"))) {
+                            return context.baker().bake(new ModelResourceLocation(MysticalAgriculture.MOD_ID, loc, "inventory"), context.settings());
+                        }
+                        return model;
+                    });
+                }
+            }
 
-        for (var cropType : CropRegistry.getInstance().getTypes()) {
-            cropModels.put(cropType.getId(), IntStream.range(0, 7)
-                    .mapToObj(i -> registry.get(new ResourceLocation(cropType.getStemModel() + "_" + i)))
-                    .toArray(BakedModel[]::new));
-        }
+            ctx.modifyModelAfterBake().register((model, context) -> {
+                var cropModels = new HashMap<ResourceLocation, ResourceLocation[]>();
 
-        for (var crop : CropRegistry.getInstance().getCrops()) {
-            var textures = crop.getTextures();
-            var crops = crop.getCropBlock();
-            var cropId = BuiltInRegistries.BLOCK.getKey(crops);
+                for (var cropType : CropRegistry.getInstance().getTypes()) {
+                    cropModels.put(cropType.getId(), IntStream.range(0, 7)
+                            .mapToObj(i -> new ResourceLocation(cropType.getStemModel() + "_" + i))
+                            .toArray(ResourceLocation[]::new));
+                }
 
-            if (cropId != null) {
-                for (int i = 0; i < 7; i++) {
-                    var location = new ModelResourceLocation(cropId, "age=" + i);
-                    var bakedModel = registry.get(location);
+                for (var crop : CropRegistry.getInstance().getCrops()) {
+                    var textures = crop.getTextures();
+                    var crops = crop.getCropBlock();
+                    var cropId = BuiltInRegistries.BLOCK.getKey(crops);
 
-                    if (bakedModel == null || bakedModel.getParticleIcon().contents().name().equals(MISSING_NO)) {
-                        var type = crop.getType().getId();
-                        registry.replace(location, cropModels.get(type)[i]);
+                    if (cropId != null) {
+                        for (int i = 0; i < 7; i++) {
+                            var location = new ModelResourceLocation(cropId, "age=" + i);
+
+                            if (model == null || model.getParticleIcon().contents().name().equals(MISSING_NO)) {
+                                if (Objects.equals(context.id(), location)) {
+                                    var type = crop.getType().getId();
+                                    return context.baker().bake(cropModels.get(type)[i], context.settings());
+                                }
+                            }
+                        }
+
+                        var location = new ModelResourceLocation(cropId, "age=7");
+
+                        if (model == null || model.getParticleIcon().contents().name().equals(MISSING_NO)) {
+                            if (Objects.equals(context.id(), location)) {
+                                var flower = textures.getFlowerTexture();
+                                var type = crop.getType().getId();
+                                var path = new ResourceLocation(type.getNamespace(), flower.getPath() + "_" + type.getPath());
+
+                                return context.baker().bake(path, context.settings()); // TODO: this one may not be reversed?
+                            }
+                        }
+                    }
+
+                    var essence = crop.getEssenceItem();
+                    var essenceId = BuiltInRegistries.ITEM.getKey(essence);
+
+                    if (essenceId != null) {
+                        var location = new ModelResourceLocation(essenceId, "inventory");
+
+                        if (model == null || model.getParticleIcon().contents().name().equals(MISSING_NO)) {
+                            if (Objects.equals(context.id(), location)) {
+                                var texture = textures.getEssenceTexture();
+
+                                return context.baker().bake(texture, context.settings()); // TODO: this one may not be reversed?
+                            }
+                        }
+                    }
+
+                    var seeds = crop.getSeedsItem();
+                    var seedsId = BuiltInRegistries.ITEM.getKey(seeds);
+
+                    if (seedsId != null) {
+                        var location = new ModelResourceLocation(seedsId, "inventory");
+
+                        if (model == null || model.getParticleIcon().contents().name().equals(MISSING_NO)) {
+                            if (Objects.equals(context.id(), location)) {
+                                var texture = textures.getSeedTexture();
+
+                                return context.baker().bake(texture, context.settings()); // TODO: this one may not be reversed?
+                            }
+                        }
                     }
                 }
-
-                var location = new ModelResourceLocation(cropId, "age=7");
-                var bakedModel = registry.get(location);
-
-                if (bakedModel == null || bakedModel.getParticleIcon().contents().name().equals(MISSING_NO)) {
-                    var flower = textures.getFlowerTexture();
-                    var type = crop.getType().getId();
-                    var path = new ResourceLocation(type.getNamespace(), flower.getPath() + "_" + type.getPath());
-                    var model = registry.get(path);
-
-                    registry.replace(location, model);
-                }
-            }
-
-            var essence = crop.getEssenceItem();
-            var essenceId = BuiltInRegistries.ITEM.getKey(essence);
-
-            if (essenceId != null) {
-                var location = new ModelResourceLocation(essenceId, "inventory");
-                var bakedModel = registry.get(location);
-
-                if (bakedModel == null || bakedModel.getParticleIcon().contents().name().equals(MISSING_NO)) {
-                    var texture = textures.getEssenceTexture();
-                    var model = registry.get(texture);
-
-                    registry.replace(location, model);
-                }
-            }
-
-            var seeds = crop.getSeedsItem();
-            var seedsId = BuiltInRegistries.ITEM.getKey(seeds);
-
-            if (seedsId != null) {
-                var location = new ModelResourceLocation(seedsId, "inventory");
-                var bakedModel = registry.get(location);
-
-                if (bakedModel == null || bakedModel.getParticleIcon().contents().name().equals(MISSING_NO)) {
-                    var texture = textures.getSeedTexture();
-                    var model = registry.get(texture);
-
-                    registry.replace(location, model);
-                }
-            }
-        }
-
-        stopwatch.stop();
-
-        MysticalAgriculture.LOGGER.info("Model replacement took {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+                return model;
+            });
+        });
     }
 }

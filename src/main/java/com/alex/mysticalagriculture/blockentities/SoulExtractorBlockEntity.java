@@ -1,6 +1,5 @@
 package com.alex.mysticalagriculture.blockentities;
 
-import com.alex.cucumber.forge.common.util.LazyOptional;
 import com.alex.mysticalagriculture.api.util.MobSoulUtils;
 import com.alex.mysticalagriculture.blocks.SoulExtractorBlock;
 import com.alex.mysticalagriculture.container.SoulExtractorContainer;
@@ -18,6 +17,7 @@ import com.alex.cucumber.helper.StackHelper;
 import com.alex.cucumber.inventory.SidedItemStackHandler;
 import com.alex.cucumber.util.Localizable;
 import com.alex.cucumber.inventory.BaseItemStackHandler;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;

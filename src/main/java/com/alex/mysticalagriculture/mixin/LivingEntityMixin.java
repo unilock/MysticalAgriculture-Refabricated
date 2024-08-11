@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -46,25 +47,6 @@ public class LivingEntityMixin {
         }
     }
 
-    public float[] ret;
-
-    @Inject(method = "causeFallDamage", at = @At(value = "HEAD"), cancellable = true)
-    private void onLivingFall(float fallDistance, float damageMultiplier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
-        ret = AugmentHandler.onLivingFall((LivingEntity) ((Object) this), fallDistance, damageMultiplier);
-        if (ret == null) cir.setReturnValue(false);
-    }
-
-    @ModifyVariable(method = "causeFallDamage", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
-    private float onLivingFall1(float value) {
-        return ret[0];
-    }
-
-    @ModifyVariable(method = "causeFallDamage", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
-    private float onLivingFall2(float value) {
-        return ret[1];
-    }
-
-
     @Inject(method = "die", at = @At(value = "HEAD"))
     private void onLivingDrops(DamageSource source, CallbackInfo ci) {
         var entity = source.getEntity();
@@ -95,6 +77,7 @@ public class LivingEntityMixin {
         }
     }
 
+    @Unique
     private static List<ItemStack> getValidSoulJars(Player player, MobSoulType type) {
         return player.getInventory().items.stream()
                 .filter(s -> s.getItem() instanceof SoulJarItem)

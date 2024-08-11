@@ -53,6 +53,7 @@ public class MysticalAgricultureClient implements ClientModInitializer {
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(EssenceVesselColorManager.INSTANCE);
 
         ModelHandler.onRegisterAdditionalModels();
+        ModelHandler.onModelBakingCompleted();
 
         ClientPlayNetworking.registerGlobalReceiver(EXPERIENCE_CAPSULE_PICKUP, (client, handler, buf, responseSender) -> client.execute(() -> {
             var player = client.player;

@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,6 +39,7 @@ public abstract class ItemInHandRendererMixin {
 
     @Shadow public abstract void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
 
+    @Unique
     private static final TagKey<Item> CROSSBOWS = TagKey.create(Registries.ITEM, new ResourceLocation(MOD_ID, "crossbows"));
 
     @Inject(at=@At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z", ordinal = 1), method = "renderArmWithItem", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)

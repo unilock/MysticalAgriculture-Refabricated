@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -16,6 +17,7 @@ import static com.alex.mysticalagriculture.MysticalAgriculture.MOD_ID;
 
 @Mixin(FishingHook.class)
 public class FishingHookMixin {
+    @Unique
     private static final TagKey<Item> FISHING_RODS = TagKey.create(Registries.ITEM, new ResourceLocation(MOD_ID, "fishing_rods"));
 
     @Redirect(method = "shouldStopFishing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z", ordinal = 0))

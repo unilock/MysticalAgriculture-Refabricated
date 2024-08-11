@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -27,6 +28,7 @@ public abstract class SnowGolemMixin {
 
     @Shadow public abstract void shear(SoundSource soundSource);
 
+    @Unique
     private static final TagKey<Item> SHEARS = TagKey.create(Registries.ITEM, new ResourceLocation(MOD_ID, "shears"));
 
     @Inject(method = "mobInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)

@@ -12,6 +12,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -22,6 +23,7 @@ import static com.alex.mysticalagriculture.MysticalAgriculture.MOD_ID;
 @Mixin(PlayerRenderer.class)
 public class PlayerRendererMixin {
 
+    @Unique
     private static final TagKey<Item> CROSSBOWS = TagKey.create(Registries.ITEM, new ResourceLocation(MOD_ID, "crossbows"));
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"), method = "getArmPose", locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)

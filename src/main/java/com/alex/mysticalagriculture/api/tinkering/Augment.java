@@ -1,10 +1,9 @@
 package com.alex.mysticalagriculture.api.tinkering;
 
-import com.alex.cucumber.forge.event.entity.living.LivingFallEvent;
 import com.alex.mysticalagriculture.api.lib.AbilityCache;
 import com.google.common.collect.Multimap;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -273,7 +272,7 @@ public class Augment {
      * @param player the player
      * @param event the fall event
      */
-    public void onPlayerFall(Level world, Player player, LivingFallEvent event) { }
+    public void onPlayerFall(Level world, Player player, LivingEntityEvents.Fall.FallEvent event) { }
 
     /**
      * Add or modify the tool attributes
